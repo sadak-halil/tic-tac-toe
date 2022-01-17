@@ -10,13 +10,13 @@ const gameBoard = (() =>{
     const diagonal1 = () => {return [_board[0][2],_board[1][1],_board[2][0]]};
     const reset = () => {
         _board.forEach((row)=>{row.fill(null)})
-        updateDisplay();
+        displayController.update();
     };
     const addMark = (row, column, mark) => {
         if(_board[row][column] === null){
             _board[row][column] = mark
         };
-        updateDisplay();
+        displayController.update();
     }
     const check = () => {
         let status = false;
@@ -45,31 +45,38 @@ const gameBoard = (() =>{
     return {board, row, column, cell, diagonal0, diagonal1, reset, addMark, check};
 })();
 
-const player = (name, mark) =>{
-    const getName = (name) => {return name}
-    const getMark = (mark) => {return mark}
-    return {getName, getMark};
+const player = (name) =>{
+    const getName = () => {return name}
+    return {getName};
 };
 
-let playerX = player('Player1', 'X');
-let playerO = player('Player2', 'O');
+let playerX = player('Player1');
+let playerO = player('Player2');
 
-function updateDisplay () {
-    // Gets the content of the array and updates the display
-    for (let i=0; i<3; i++){
-        let displayRow = document.getElementsByClassName(`row${i}`)
-        for (let j=0; j<3; j++){
-            displayRow[j].innerHTML = gameBoard.row(i)[j];
+const displayController = (() =>{
+    const update = () =>{
+        // Gets the content of the array and updates the display
+        for (let i=0; i<3; i++){
+            let displayRow = document.getElementsByClassName(`row${i}`)
+            for (let j=0; j<3; j++){
+                displayRow[j].innerHTML = gameBoard.row(i)[j];
+            }
         }
+    };
+    const alertWinner = () => {
+        window.alert(`${game.winner()} wins!`)
     }
-};
+    return {update, alertWinner};
+})(); 
+
 
 const game = (() =>{
 
     let _turn = 'X';
     let _gameOver = false;
 
-    const playRound = () => {
+    const playRound = (row,column) => {
+        gameBoard.addMark(row, column, _turn);
         _turn === 'X' ? _turn = 'O' : _turn = 'X';
     }
 
@@ -78,9 +85,11 @@ const game = (() =>{
         return _gameOver
     }
 
-    const getTurn = () => {return _turn}
+    const winner = () => {
+        return _turn === 'X' ? playerO.getName() : playerX.getName();
+    }
 
-    return{getTurn, isGameOver, playRound}
+    return{isGameOver, playRound, winner}
 })();
 
 document.getElementById('game-board').childNodes.forEach(item => {
@@ -88,10 +97,9 @@ document.getElementById('game-board').childNodes.forEach(item => {
         item.addEventListener('click', (e) =>{
             const _column = e.target.dataset.column
             const _row = e.target.className.substr(e.target.className.length - 1)
-
-            gameBoard.addMark(_row, _column, game.getTurn());
-            game.playRound();
-            console.log(game.isGameOver());//TODO change X and O turns
+            game.playRound(_row, _column);
+            if (game.isGameOver()){displayController.alertWinner()};
+            //TODO if game is over, display the winner(done), reset the game(game.reset() needs to be written)
         })
     }
 });
