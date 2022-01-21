@@ -15,9 +15,11 @@ const gameBoard = (() =>{
     const addMark = (row, column, mark) => {
         if(_board[row][column] === null){
             _board[row][column] = mark
+            game.changeTurn(); // change the turn only if the play is on an empty cell
+            displayController.update();
         };
-        displayController.update();
-    }
+        return;
+    };
     const check = () => {
         let status = false;
         //function that check arrat members for equality
@@ -77,6 +79,9 @@ const game = (() =>{
 
     const playRound = (row,column) => {
         gameBoard.addMark(row, column, _turn);
+    }
+
+    const changeTurn = () => {
         _turn === 'X' ? _turn = 'O' : _turn = 'X';
     }
 
@@ -89,7 +94,7 @@ const game = (() =>{
         return _turn === 'X' ? playerO.getName() : playerX.getName();
     }
 
-    return{isGameOver, playRound, winner}
+    return{isGameOver, playRound, winner, changeTurn}
 })();
 
 document.getElementById('game-board').childNodes.forEach(item => {
@@ -98,7 +103,7 @@ document.getElementById('game-board').childNodes.forEach(item => {
             const _column = e.target.dataset.column
             const _row = e.target.className.substr(e.target.className.length - 1)
             game.playRound(_row, _column);
-            if (game.isGameOver()){displayController.alertWinner()};
+            if (game.isGameOver()){window.addEventListener("load", () => {displayController.alertWinner()})}; //TODO BUG shows the alert before rendering the html
             //TODO if game is over, display the winner(done), reset the game(game.reset() needs to be written)
         })
     }
