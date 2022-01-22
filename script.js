@@ -2,7 +2,8 @@
 //TODO make sure that functions are public only when needed
 const gameBoard = (() =>{
     let _board = [[null,null,null],[null,null,null],[null,null,null]];
-    const row = (r) =>{return [_board[r][0],_board[r][1],_board[r][2]]}; 
+    const row = (r) =>{return [_board[r][0],_board[r][1],_board[r][2]]};
+    const cell = (r,c) => {return _board[r][c]};
     const _column = (c) => {return [_board[0][c],_board[1][c],_board[2][c]]};
     const _diagonal0 = () => {return [_board[0][0],_board[1][1],_board[2][2]]};
     const _diagonal1 = () => {return [_board[0][2],_board[1][1],_board[2][0]]};
@@ -43,7 +44,7 @@ const gameBoard = (() =>{
         }
         return status;
     }
-    return {row, reset, addMark, check};
+    return {row, reset, addMark, check, cell};
 })();
 
 const player = (name) =>{
@@ -79,8 +80,39 @@ const game = (() =>{
     let _turn = 'X'; // X always starts first
     let _gameOver = false;
 
-    const playRound = (row,column) => {
+    const _randomCell = () =>{
+        const row = Math.floor(Math.random() * 3);
+        const column = Math.floor(Math.random() * 3);
+        const value = gameBoard.cell(row, column); 
+        return {row, column, value}
+    }
+
+    const computerPlay = () =>{
+        let cell;
+        do {cell = _randomCell()} while (cell.value != null);
+        gameBoard.addMark(cell.row, cell.column, _turn);
+        //TODO repeptitive code in human computer play, clean up
+        if (isGameOver()){
+            displayController.alertWinner();
+            setTimeout((() => reset()), 1); //the timeout is needed to stop the execution otherwise the reset happens before the alert and hence ruining the experience 
+        }
+        if (isGameTie()){
+            displayController.alertTie();
+            setTimeout((() => reset()), 1);
+        };
+    };
+
+
+    const humanPlay = (row,column) => {
         gameBoard.addMark(row, column, _turn);
+        if (isGameOver()){
+            displayController.alertWinner();
+            setTimeout((() => reset()), 1); //the timeout is needed to stop the execution otherwise the reset happens before the alert and hence ruining the experience 
+        }
+        if (isGameTie()){
+            displayController.alertTie();
+            setTimeout((() => reset()), 1);
+        };
     }
 
     const changeTurn = () => {
@@ -112,23 +144,19 @@ const game = (() =>{
         _turn = 'X';
     }
 
-    return{isGameOver, playRound, winner, changeTurn, reset, isGameTie}
+    return{humanPlay, computerPlay, isGameOver, winner, changeTurn, reset, isGameTie}
 })();
 
 document.getElementById('game-board').childNodes.forEach(item => {
     if(item.nodeName === 'DIV'){
         item.addEventListener('click', (e) =>{
-            const _column = e.target.dataset.column
-            const _row = e.target.className.substr(e.target.className.length - 1)
-            game.playRound(_row, _column);
-            if (game.isGameOver()){
-                displayController.alertWinner();
-                setTimeout((() => game.reset()), 1); //the timeout is needed to stop the execution otherwise the reset happens before the alert and hence ruining the experience 
+            const _column = e.target.dataset.column;
+            const _row = e.target.className.substr(e.target.className.length - 1);
+            if (gameBoard.cell(_row,_column) === null && !game.isGameOver() && !game.isGameTie()){
+            game.humanPlay(_row, _column)};
+            if (!game.isGameOver() && !game.isGameTie()){
+                setTimeout(() => game.computerPlay(), 250);
             }
-            if (game.isGameTie()){
-                displayController.alertTie();
-                setTimeout((() => game.reset()), 1);
-            };
         })
     }
 });
