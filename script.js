@@ -20,9 +20,10 @@ const gameBoard = (() =>{
         };
         return;
     };
+    
     const check = () => {
         let status = false;
-        //function that check arrat members for equality
+        //function that check array members for equality
         const _allEqual = arr => arr.every(value => value === arr[0]);
         //loop to check all rows and columns
         for (let i = 0; i<3; i++){
@@ -67,14 +68,17 @@ const displayController = (() =>{
     };
     const alertWinner = () => {
         setTimeout (() => window.alert(`${game.winner()} wins!`), 1); //delay is needed so the browser can render the HTML before the alert pops up
+    };
+    const alertTie = () => {
+        setTimeout (() => window.alert(`It is a tie!`), 1);
     }
-    return {update, alertWinner};
+    return {update, alertWinner, alertTie};
 })(); 
 
 
 const game = (() =>{
 
-    let _turn = 'X';
+    let _turn = 'X'; // X always starts first
     let _gameOver = false;
 
     const playRound = (row,column) => {
@@ -84,6 +88,15 @@ const game = (() =>{
     const changeTurn = () => {
         _turn === 'X' ? _turn = 'O' : _turn = 'X';
     }
+
+    const isGameTie = () => {
+        if (_gameOver === false){ 
+        for(let i=0; i<3; i++){
+            if (gameBoard.row(i).includes(null)){return false}
+            else continue;
+            };
+        return true;
+    }}
 
     const isGameOver = () => {
         if (gameBoard.check() === true){_gameOver = true}
@@ -100,7 +113,7 @@ const game = (() =>{
         _turn = 'X';
     }
 
-    return{isGameOver, playRound, winner, changeTurn, reset}
+    return{isGameOver, playRound, winner, changeTurn, reset, isGameTie}
 })();
 
 document.getElementById('game-board').childNodes.forEach(item => {
@@ -112,6 +125,10 @@ document.getElementById('game-board').childNodes.forEach(item => {
             if (game.isGameOver()){
                 displayController.alertWinner();
                 setTimeout((() => game.reset()), 1); //the timeout is needed to stop the execution otherwise the reset happens before the alert and hence ruining the experience 
+            }
+            if (game.isGameTie()){
+                displayController.alertTie();
+                setTimeout((() => game.reset()), 1);
             };
         })
     }
