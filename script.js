@@ -91,20 +91,16 @@ const game = (() =>{
         let cell;
         do {cell = _randomCell()} while (cell.value != null);
         gameBoard.addMark(cell.row, cell.column, _turn);
-        //TODO repeptitive code in human computer play, clean up
-        if (isGameOver()){
-            displayController.alertWinner();
-            setTimeout((() => reset()), 1); //the timeout is needed to stop the execution otherwise the reset happens before the alert and hence ruining the experience 
-        }
-        if (isGameTie()){
-            displayController.alertTie();
-            setTimeout((() => reset()), 1);
-        };
+        _checkEndGameConditions();
     };
 
 
     const humanPlay = (row,column) => {
         gameBoard.addMark(row, column, _turn);
+        _checkEndGameConditions();
+    }
+
+    const _checkEndGameConditions = () => {
         if (isGameOver()){
             displayController.alertWinner();
             setTimeout((() => reset()), 1); //the timeout is needed to stop the execution otherwise the reset happens before the alert and hence ruining the experience 
