@@ -66,7 +66,7 @@ const displayController = (() =>{
         }
     };
     const alertWinner = () => {
-        window.alert(`${game.winner()} wins!`)
+        setTimeout (() => window.alert(`${game.winner()} wins!`), 1); //delay is needed so the browser can render the HTML before the alert pops up
     }
     return {update, alertWinner};
 })(); 
@@ -94,7 +94,13 @@ const game = (() =>{
         return _turn === 'X' ? playerO.getName() : playerX.getName();
     }
 
-    return{isGameOver, playRound, winner, changeTurn}
+    const reset = () => {
+        gameBoard.reset();
+        _gameOver = false;
+        _turn = 'X';
+    }
+
+    return{isGameOver, playRound, winner, changeTurn, reset}
 })();
 
 document.getElementById('game-board').childNodes.forEach(item => {
@@ -103,8 +109,10 @@ document.getElementById('game-board').childNodes.forEach(item => {
             const _column = e.target.dataset.column
             const _row = e.target.className.substr(e.target.className.length - 1)
             game.playRound(_row, _column);
-            if (game.isGameOver()){window.addEventListener("load", () => {displayController.alertWinner()})}; //TODO BUG shows the alert before rendering the html
-            //TODO if game is over, display the winner(done), reset the game(game.reset() needs to be written)
+            if (game.isGameOver()){
+                displayController.alertWinner();
+                setTimeout((() => game.reset()), 1); //the timeout is needed to stop the execution otherwise the reset happens before the alert and hence ruining the experience 
+            };
         })
     }
 });
