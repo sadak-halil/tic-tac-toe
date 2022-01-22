@@ -2,19 +2,17 @@
 //TODO make sure that functions are public only when needed
 const gameBoard = (() =>{
     let _board = [[null,null,null],[null,null,null],[null,null,null]];
-    const board = () =>{return _board};
     const row = (r) =>{return [_board[r][0],_board[r][1],_board[r][2]]}; 
-    const column = (c) => {return [_board[0][c],_board[1][c],_board[2][c]]};
-    const cell = (r,c) => {return _board[r][c]};
-    const diagonal0 = () => {return [_board[0][0],_board[1][1],_board[2][2]]};
-    const diagonal1 = () => {return [_board[0][2],_board[1][1],_board[2][0]]};
+    const _column = (c) => {return [_board[0][c],_board[1][c],_board[2][c]]};
+    const _diagonal0 = () => {return [_board[0][0],_board[1][1],_board[2][2]]};
+    const _diagonal1 = () => {return [_board[0][2],_board[1][1],_board[2][0]]};
     const reset = () => {
         _board.forEach((row)=>{row.fill(null)})
         displayController.update();
     };
-    const addMark = (row, column, mark) => {
-        if(_board[row][column] === null){
-            _board[row][column] = mark
+    const addMark = (row, _column, mark) => {
+        if(_board[row][_column] === null){
+            _board[row][_column] = mark
             game.changeTurn(); // change the turn only if the play is on an empty cell
             displayController.update();
         };
@@ -31,21 +29,21 @@ const gameBoard = (() =>{
                 if (row(i)[0] != null){
                     if (_allEqual(row(i)) === true){ status = true};
                 };
-                if (column(i)[0] != null){
-                    if (_allEqual(column(i)) === true){ status = true};
+                if (_column(i)[0] != null){
+                    if (_allEqual(_column(i)) === true){ status = true};
                 };
             }
         //check the diagonals
-        if (diagonal0()[0] != null){
-            if (_allEqual(diagonal0()) === true){ status = true};
+        if (_diagonal0()[0] != null){
+            if (_allEqual(_diagonal0()) === true){ status = true};
         };
-        if (diagonal1()[0] != null){
-            if (_allEqual(diagonal1()) === true){ status = true};
+        if (_diagonal1()[0] != null){
+            if (_allEqual(_diagonal1()) === true){ status = true};
         };
         }
         return status;
     }
-    return {board, row, column, cell, diagonal0, diagonal1, reset, addMark, check};
+    return {row, reset, addMark, check};
 })();
 
 const player = (name) =>{
@@ -103,6 +101,7 @@ const game = (() =>{
         return _gameOver
     }
 
+    //winner is the last player whose turn it was
     const winner = () => {
         return _turn === 'X' ? playerO.getName() : playerX.getName();
     }
